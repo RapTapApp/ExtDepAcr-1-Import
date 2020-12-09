@@ -6,7 +6,7 @@ steps:
     # Note: the test validation image isn't saved to the registry
     # but the task logs captures log validation results
     build: >
-      --build-arg REGISTRY_FROM_URL={{.Values.REGISTRY_FROM_URL}} 
+      --build-arg FROM_URL={{.Values.FROM_URL}}
       -f ./Dockerfile
       -t {{.Run.Registry}}/node-import:test
       .
@@ -16,16 +16,16 @@ steps:
     cmd: "{{.Run.Registry}}/node-import:test"
   - id: retag-base-image
     # import the public image to base-artifacts
-    # Override the stable tag, 
+    # Override the stable tag,
     # and create a unique tag to enable rollback
     # to a previously working image
     when: ['validate-base-image']
-    cmd: docker tag {{.Values.REGISTRY_FROM_URL}}node:15-alpine {{.Run.Registry}}/node:15-alpine
+    cmd: docker tag {{.Values.FROM_URL}}node:15-alpine {{.Run.Registry}}/node:15-alpine
   - id: retag-base-image-unique-tag
     when: ['retag-base-image']
-    cmd: docker tag {{.Values.REGISTRY_FROM_URL}}node:15-alpine {{.Run.Registry}}/node:15-alpine-{{.Run.ID}}
+    cmd: docker tag {{.Values.FROM_URL}}node:15-alpine {{.Run.Registry}}/node:15-alpine-{{.Run.ID}}
   - id: push-base-image
     when: ['retag-base-image', 'retag-base-image-unique-tag']
-    push: 
+    push:
     - "{{.Run.Registry}}/node:15-alpine"
     - "{{.Run.Registry}}/node:15-alpine-{{.Run.ID}}"
